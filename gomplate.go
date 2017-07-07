@@ -33,11 +33,11 @@ func (g *Gomplate) RunTemplate(text string, out io.Writer) {
 }
 
 // NewGomplate -
-func NewGomplate(data *Data, leftDelim, rightDelim string) *Gomplate {
+func NewGomplate(data *Data, o *GomplateOpts) *Gomplate {
 	return &Gomplate{
-		leftDelim:  leftDelim,
-		rightDelim: rightDelim,
-		funcMap:    initFuncs(data),
+		leftDelim:  o.lDelim,
+		rightDelim: o.rDelim,
+		funcMap:    initFuncs(data, o),
 	}
 }
 
@@ -45,7 +45,7 @@ func runTemplate(o *GomplateOpts) error {
 	defer runCleanupHooks()
 	data := NewData(o.dataSources, o.dataSourceHeaders)
 
-	g := NewGomplate(data, o.lDelim, o.rDelim)
+	g := NewGomplate(data, o)
 
 	if o.inputDir != "" {
 		return processInputDir(o.inputDir, o.outputDir, g)
