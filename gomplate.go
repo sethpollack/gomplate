@@ -4,10 +4,12 @@ import (
 	"io"
 	"log"
 	"text/template"
+
+	"github.com/Masterminds/sprig"
 )
 
 func (g *Gomplate) createTemplate() *template.Template {
-	return template.New("template").Funcs(g.funcMap).Option("missingkey=error")
+	return template.New("template").Funcs(sprig.TxtFuncMap()).Funcs(g.funcMap).Option("missingkey=error")
 }
 
 // Gomplate -

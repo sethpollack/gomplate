@@ -1,11 +1,43 @@
 package main
 
 import (
+	"io/ioutil"
+	"log"
 	"net/url"
 	"text/template"
 
+	yaml "gopkg.in/yaml.v2"
+
 	"github.com/hairyhenderson/gomplate/funcs"
 )
+
+func ReadFile(path string) string {
+	b, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(b)
+}
+
+func ReadDir(dir string) string {
+	fileMap := make(map[string]string)
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, file := range files {
+		if !file.IsDir() {
+			fileMap[file.Name()] = ReadFile(dir + "/" + file.Name())
+		}
+	}
+
+	b, err := yaml.Marshal(fileMap)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(b)
+}
 
 // initFuncs - The function mappings are defined here!
 func initFuncs(data *Data) template.FuncMap {
@@ -13,6 +45,8 @@ func initFuncs(data *Data) template.FuncMap {
 	typeconv := &TypeConv{}
 
 	f := template.FuncMap{
+		"readDir":          ReadDir,
+		"readFile":         ReadFile,
 		"getenv":           env.Getenv,
 		"bool":             typeconv.Bool,
 		"has":              typeconv.Has,
@@ -42,5 +76,6 @@ func initFuncs(data *Data) template.FuncMap {
 	funcs.AddNetFuncs(f)
 	funcs.AddReFuncs(f)
 	funcs.AddStringFuncs(f)
+
 	return f
 }
